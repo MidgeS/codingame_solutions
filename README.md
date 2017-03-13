@@ -1,2 +1,2 @@
-# codingame_solutions
-Solutions for CodingGame 
+# CodinGame Solutions
+My solutions for CodingGame puzzles and challenges
