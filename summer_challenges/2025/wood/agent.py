@@ -83,6 +83,7 @@ def readActiveAgentData(agent_count):
     global agents
     global own_active_agents
     global enemy_active_agents
+    global my_id
     for i in range(agent_count):
         # cooldown: Number of turns before this agent can shoot
         # wetness: Damage (0-100) this agent has taken
@@ -92,10 +93,19 @@ def readActiveAgentData(agent_count):
         agents[agent_id].updateCooldown(cooldown)
         agents[agent_id].updateSplashBombs(splash_bombs)
         agents[agent_id].updateWetness(wetness)
-        if(agents[agent_id].player_id == 0):
+        if(agents[agent_id].player_id == my_id):
             own_active_agents[agent_id] = agents[agent_id]
         else:
             enemy_active_agents[agent_id] = agents[agent_id]
+
+def findTargetAgent(agents):
+    highest_wetness = 0
+    target = -1
+    for x in agents.values():
+        if x.wetness > highest_wetness:
+            highest_wetness = x.wetness
+            target = x
+    return target
 #endregion
 
 #region game logic
@@ -129,20 +139,25 @@ while True:
 
     my_agent_count = int(input())  # Number of alive agents controlled by you
     
-    print(f"agents: {my_agent_count}", file=sys.stderr, flush=True)
+    #print(f"agents: {my_agent_count}", file=sys.stderr, flush=True)
 
     #closest_a = findClosestAgent((6,1),own_active_agents)
     #print(f"closest to a: {closest_a}", file=sys.stderr, flush=True)
 
     #closest_b = findClosestAgent((6,3),own_active_agents)
     #print(f"closest to b: {closest_b}", file=sys.stderr, flush=True)
+    target = findTargetAgent(enemy_active_agents)
 
-    targets = [(6,1), (6,3)]
     for agent in own_active_agents.values():
-        if agent.player_id == 0:
-            target = findClosestTarget(agent, targets)
-            print(f"agent: {agent.id} -> target: {target}", file=sys.stderr, flush=True)
-            print(f"{agent.id};MOVE {target[0]} {target[1]}")
+        if agent.player_id == my_id:
+            command = f"{agent.id};"
+            if calculateDistance((agent.x, agent.y), (target.x, target.y)) > agent.optimal_range:
+                command += f"MOVE {target.x} {target.y};"
+
+            command += f"SHOOT {target.id};"
+            print(command)
+
+
     # for agent in enemy_active_agents.values():
     #     if agent.player_id == 1:
     #         print(f"agent enemy: {agent.id}", file=sys.stderr, flush=True)
