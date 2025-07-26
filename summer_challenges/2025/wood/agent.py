@@ -100,7 +100,10 @@ class Map:
             for x in range(width):
                 line += str(self.getCell(x,y))
             
-            print(line, file=sys.stderr, flush=True)
+            debugPrint(line)
+
+def debugPrint(line):
+    print(line, file=sys.stderr, flush=True)
 
 def findClosestAgent(target, agents):
     closest_agent = 0
@@ -184,11 +187,11 @@ def findTargetAgent(agent: Agent, enemy_agents: dict[int,Agent]):
     # only check cover in direction of target
     # pick targett with least cover in target direction
     for enemy_in_range in in_range:
-        print(f"checking enemy {enemy_in_range.x},{enemy_in_range.y}", file=sys.stderr, flush=True)
+        debugPrint(f"checking enemy {enemy_in_range.x},{enemy_in_range.y}")
         cover = findCoverBetweenAgentAndTarget(agent, enemy_in_range, map)
-        print(f"best cover found at {cover[0]},{cover[1]} - cover: {cover[2]}", file=sys.stderr, flush=True)
+        debugPrint(f"best cover found at {cover[0]},{cover[1]} - cover: {cover[2]}")
         if cover[0] >= 0 and cover[1] >= 0 and (cover_cell := map.getCell(cover[0], cover[1])) < target_cover:
-            print(f"new best cover - cell: {cover_cell}", file=sys.stderr, flush=True)
+            debugPrint(f"new best cover - cell: {cover_cell}")
             target_cover = cover_cell
             best_target = enemy_in_range
         if cover[0] == -1 and cover[1] == -1:
@@ -197,54 +200,72 @@ def findTargetAgent(agent: Agent, enemy_agents: dict[int,Agent]):
 
     return best_target
 
-#region current dev
+def isAgentAdjacentToCover(agent: Agent, cell: tuple[int,int]):
+    adjacent = False
+
+    if agent.x == cell[0] - 1 and agent.y == cell[1] : adjacent = True
+    if agent.x == cell[0] + 1 and agent.y == cell[1] : adjacent = True
+    if agent.x == cell[0] and agent.y == cell[1] - 1 : adjacent = True
+    if agent.x == cell[0] and agent.y == cell[1] - 2 : adjacent = True
+
+    return adjacent
+
+
 def findCoverBetweenAgentAndTarget(agent: Agent, enemy: Agent, map: Map):
     #get direction vector
     x_dir = max(-1, min(1, agent.x - enemy.x))
     y_dir = max(-1, min(1, agent.y - enemy.y))
     
-    print(f"dir vector {x_dir},{y_dir}", file=sys.stderr, flush=True)
+    debugPrint(f"dir vector {x_dir},{y_dir}")
+
+    x_coord = (enemy.x + x_dir, enemy.y)
+    y_coord = (enemy.x, enemy.y + y_dir)
 
     #check all cells adjacent to enemy in vector directions
     x_cell = map.getCell(enemy.x + x_dir, enemy.y)
     y_cell = map.getCell(enemy.x, enemy.y + y_dir)
 
-    print(f"x cell {enemy.x + x_dir},{enemy.y} - {x_cell}", file=sys.stderr, flush=True)
-    print(f"y cell {enemy.x},{enemy.y + y_dir} - {y_cell}", file=sys.stderr, flush=True)
+    debugPrint(f"x cell {enemy.x + x_dir},{enemy.y} - {x_cell}")
+    debugPrint(f"y cell {enemy.x},{enemy.y + y_dir} - {y_cell}")
 
     #if cell is cover check if agent is next to that cover respecting direction vector
     x_cover = y_cover = 0
     if x_cell == TileType.LOW_COVER or x_cell == TileType.HIGH_COVER:
-        x_cover = x_cell
+        #check if agent next to cover
+        if not isAgentAdjacentToCover(agent, x_coord):
+            x_cover = x_cell
     if y_cell == TileType.LOW_COVER or y_cell == TileType.HIGH_COVER:
-        y_cover = y_cell
+        #check if agent next to cover
+        if not isAgentAdjacentToCover(agent, y_coord):
+            y_cover = y_cell
 
-    if x_cover >= y_cover:
+    if x_cover > 0 and x_cover >= y_cover:
         return (enemy.x + x_dir, enemy.y, x_cover)
-    if y_cover > x_cover:
+    if y_cover > 0 and y_cover > x_cover:
         return (enemy.x, enemy.y + y_dir, x_cover)
     
     return (-1,-1, 0)
 
 def getBestCellCover(cell_coords, map: Map):
+
     
-    print(f"search cell {cell_coords}", file=sys.stderr, flush=True)
+    debugPrint(f"search cell {cell_coords}")
     cover_value = TileType.EMPTY
     top_cell = map.getCell(cell_coords[0], cell_coords[1] - 1)
     if top_cell != -1 and top_cell > cover_value:
-        print(f"top is cover", file=sys.stderr, flush=True)
+        debugPrint(f"top is cover")
         cover_value = top_cell
     bottom_cell = map.getCell(cell_coords[0], cell_coords[1] + 1)
     if bottom_cell != -1 and bottom_cell > cover_value:
-        print(f"bottom is cover", file=sys.stderr, flush=True)
+        debugPrint(f"bottom is cover")
         cover_value = bottom_cell
     left_cell = map.getCell(cell_coords[0] - 1, cell_coords[1])
     if left_cell != -1 and left_cell > cover_value:
-        print(f"left is cover", file=sys.stderr, flush=True)
+        debugPrint(f"left is cover")
         cover_value = left_cell
     right_cell = map.getCell(cell_coords[0] + 1, cell_coords[1])
     if right_cell != -1 and right_cell > cover_value:
-        print(f"right is cover", file=sys.stderr, flush=True)
+        debugPrint(f"right is cover")
         cover_value = right_cell
 
     return cover_value
@@ -256,19 +277,19 @@ def findNeighboringCovers(agent: Agent, map: Map, cellCoverFunction):
     #find cover in neighbor cells
     top_cell = cellCoverFunction((agent.x, agent.y - 1), map)
     if top_cell == TileType.HIGH_COVER or top_cell == TileType.LOW_COVER:
-        print("top cell has cover", file=sys.stderr, flush=True)
+        debugPrint("top cell has cover")
         covers.append((agent.x, agent.y-1, top_cell))
     bottom_cell = cellCoverFunction((agent.x, agent.y+1), map)
     if bottom_cell == TileType.HIGH_COVER or bottom_cell == TileType.LOW_COVER:
-        print("bottom cell has cover", file=sys.stderr, flush=True)
+        debugPrint("bottom cell has cover")
         covers.append((agent.x, agent.y+1, bottom_cell))
     left_cell = cellCoverFunction((agent.x-1, agent.y), map)
     if left_cell == TileType.HIGH_COVER or left_cell == TileType.LOW_COVER:
-        print("left cell has cover", file=sys.stderr, flush=True)
+        debugPrint("left cell has cover")
         covers.append((agent.x-1, agent.y, left_cell))
     right_cell = cellCoverFunction((agent.x+1, agent.y), map)
     if right_cell == TileType.HIGH_COVER or right_cell == TileType.LOW_COVER:
-        print("right cell has cover", file=sys.stderr, flush=True)
+        debugPrint("right cell has cover")
         covers.append((agent.x+1, agent.y, right_cell))
 
     return covers        
@@ -281,7 +302,7 @@ def findBestCover(agent: Agent, map: Map):
     cover_coords = (-1,-1)
 
     for cover in covers:
-        print(f"agent cover: {cover}", file=sys.stderr, flush=True)
+        debugPrint(f"agent cover: {cover}")
         if cover[2] > cover_value:
             cover_value = cover[2]
             cover_coords = cover[:2]
@@ -302,6 +323,46 @@ def findLeastCover(agent: Agent, map: Map):
             cover_coords = cover
 
     return cover_coords
+
+#region current dev
+def findEnclosedAgentAndArea(agents : dict[int, Agent], areas, my_id):
+    for agent in agents.values():
+        if agent.player_id == my_id:
+            for area in range(len(areas)):
+                if agentAdjacentToCell(agent, (areas[area][0], areas[area][1])):
+                    return (agent, area)
+
+    return (-1, -1)
+
+def agentAdjacentToCell(agent: Agent, cell: tuple[int,int]):
+    
+    return cell[0] - 1 <= agent.x <= cell[0] + 1 and cell[1] - 1 <= agent.y <= cell[1] + 1
+
+def agentInArea(agent: Agent, center: tuple[int, int], distance):
+    return center[0] - distance <= agent.x <= center[0] + distance and center[1] - distance <= agent.y <= center[1] + distance
+
+def findBombTargetInArea(agents: dict[int,Agent], area: tuple[int,int,bool]):
+    #find target in area with most enemy hits
+    #target is not valid if own agent would be hit
+    max_target_count = 0
+    target = None
+    for x in range(area[0]-1, area[0]+2):
+        for y in range(area[1]-1, area[1]+2):
+            debugPrint(f"target in area: {x} {y}")
+            target_count = 0
+            for agent in agents.values():
+                if agentInArea(agent, (x,y), 1):
+                    global my_id
+                    if agent.player_id == my_id:
+                        debugPrint("whould hit itself")
+                        break
+                    target_count += 1
+            else:
+                debugPrint(f"targets: {target_count}")
+                if target_count > max_target_count:
+                    target = (x,y)
+                continue
+    return target
 #endregion
 
 #region game logic
@@ -329,6 +390,11 @@ for i in range(height):
 
 map.printMap()
 
+areas = [(2, 2, False), (map.width-3, 2, False), (2, map.height-3, False), (map.width-3, map.height-3, False)]
+
+agent_target = None
+target_area = None
+
 #region game loop
 while True:
     agent_count = int(input())  # Total number of agents still in the game
@@ -339,27 +405,48 @@ while True:
     readActiveAgentData(agent_count)
 
     my_agent_count = int(input())  # Number of alive agents controlled by you
+    
+    agent_and_area = findEnclosedAgentAndArea(agents, areas, my_id)
+    debugPrint(f"agent {agent_and_area[0].id} in area {agent_and_area[1]} at {areas[agent_and_area[1]]}")
 
     agent: Agent
     for agent in own_active_agents.values():
         agent_command = f"{agent.id};"
         if agent.player_id == my_id:
-            print("my agent", file=sys.stderr, flush=True)
-            #first find cover and then attack enemy with least cover in optimal range
-            cover = findBestCover(agent, map)
-            
-            print(f"cover: {cover}", file=sys.stderr, flush=True)
-            if cover[0] >= 0 and cover[1] >= 0:
-                agent_command += f"MOVE {cover[0]} {cover[1]};"
-                #only works in wood 2
-                agent.updatePosition(cover[0], cover[1])
-            
-            target: Agent = findTargetAgent(agent, enemy_active_agents)
-            if target != -1:
-                print(f"target: {target.id}", file=sys.stderr, flush=True)
-                agent_command += f"SHOOT {target.id};"
+            if agent.id == agent_and_area[0].id:
+                agent_command += f"MOVE {agent.x} {agent.y};"
+                debugPrint(f"splash bombs in area: {agent.splash_bombs}")
+                #if agent.splash_bombs > 0:
+                 #   bomb_target = findBombTargetInArea(agents, areas[agent_and_area[1]])
+                  #  if bomb_target:
+                   #     agent_command += f"THROW {bomb_target[0]} {bomb_target[1]}"
+                    #pass
+            else:
+                
+                debugPrint(f"splash bombs moving: {agent.splash_bombs}")
+                #move to populated area and throw bomb if close
+                if agent_target:
+                    # if close enough throw bomb and clear target else keep moving
+                    dist = calculateDistance((agent.x, agent.y),agent_target)
+                    if dist <= 4:
+                        agent_command += f"MOVE {agent.x} {agent.y};"
+                        agent_command += f"THROW {agent_target[0]} {agent_target[1]};"
+                        areas[target_area] = (areas[target_area][0], areas[target_area][1], True)
+                        agent_target = None
+                    else:
+                        agent_command += f"MOVE {agent_target[0]} {agent_target[1]};"
+                else:
+                    #pick new target
+                    # improve to pick closest first to prevent needles running around and wasting rounds
+                    for x in range(len(areas)):
+                        if x != agent_and_area[1] and areas[x][2] == False:
+                            target_area = x
+                            agent_target = (areas[x][0], areas[x][1])
+                            agent_command += f"MOVE {agent_target[0]} {agent_target[1]};"
+                            break
 
             print(agent_command)
+            
 #endregion
 #endregion
 
@@ -370,4 +457,10 @@ while True:
     #print(f"own agent: {i}", file=sys.stderr, flush=True)
 
     # One line per agent: <agentId>;<action1;action2;...> actions are "MOVE x y | SHOOT id | THROW x y | HUNKER_DOWN | MESSAGE text"
+#endregion
+
+#region notes
+    # hardcode areas and centers?
+    # find area with agent inside and throw there
+    # other agent runs all other 3 areas and throws bombs
 #endregion
