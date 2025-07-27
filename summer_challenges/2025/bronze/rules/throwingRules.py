@@ -23,15 +23,10 @@ class ThrowingRules(RulesBase):
         if enemies_left <=1:
             expected_target_count = 1
         
-        if agent.getAgentId() == 1:
-            debugPrint(f"{x_min} {x_max} {y_min} {y_max}")
-
         bomb_target = (-1,-1)
         best_target_count = 0
         for x in range(x_min, x_max):
             for y in range(y_min, y_max):
-                if agent.getAgentId() == 1:
-                    debugPrint(f"check target {x}, {y}")
                 possible_targets = 0
                 #calculate enemies in explosion zone AND dont hit own agents
                 x_min_explosion = clampValues(x - 1, 0, map.getWidth())
@@ -43,20 +38,18 @@ class ThrowingRules(RulesBase):
                     if (x_min_explosion <= agents[a].getPosition()[0] <= x_max_explosion and
                         y_min_explosion <= agents[a].getPosition()[1] <= y_max_explosion):
                         if agents[a].getPlayerId() == agent.getPlayerId():
-                            debugPrint("would hit own agent")
+                            #debugPrint("would hit own agent")
                             break
                         else:
                             possible_targets += 1
-                            debugPrint(f"new target count {possible_targets}")
+                            #debugPrint(f"new target count {possible_targets}")
                 else:
-                    if agent.getAgentId() == 1:
-                        debugPrint("finished without breaking")
                     if possible_targets >= expected_target_count and possible_targets > best_target_count:
                         best_target_count = possible_targets
                         bomb_target = (x,y)
-                        debugPrint(f"new target {bomb_target}")
+                        #debugPrint(f"new target {bomb_target}")
 
-        debugPrint(f"agent {agent.getAgentId()} target {bomb_target} hits {best_target_count}")
+        #debugPrint(f"agent {agent.getAgentId()} target {bomb_target} hits {best_target_count}")
         if bomb_target[0] > -1 and bomb_target[1] > -1 and agent.getSplashBombs() > 0:
             agent_command.setThrowTarget(bomb_target)
             return True
