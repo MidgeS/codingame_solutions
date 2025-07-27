@@ -15,6 +15,13 @@ class ThrowingRules(RulesBase):
         y_min = clampValues(agent.getPosition()[1] - 4, 0, map.getHeight())
         y_max = clampValues(agent.getPosition()[1] + 4, 0, map.getHeight())
 
+        expected_target_count = 2
+        enemies_left = 0
+        for enemy in agents:
+            if agents[enemy].getPlayerId() != agent.getPlayerId():
+                enemies_left += 1
+        if enemies_left <=1:
+            expected_target_count = 1
         
         if agent.getAgentId() == 1:
             debugPrint(f"{x_min} {x_max} {y_min} {y_max}")
@@ -44,7 +51,7 @@ class ThrowingRules(RulesBase):
                 else:
                     if agent.getAgentId() == 1:
                         debugPrint("finished without breaking")
-                    if possible_targets > 1 and possible_targets > best_target_count:
+                    if possible_targets >= expected_target_count and possible_targets > best_target_count:
                         best_target_count = possible_targets
                         bomb_target = (x,y)
                         debugPrint(f"new target {bomb_target}")
