@@ -20,6 +20,7 @@ def readAgentData(agent_data_count):
 
 def readActiveAgentData(agent_count):
     global agents
+    global active_agents
     global own_active_agents
     global enemy_active_agents
     global my_id
@@ -36,6 +37,8 @@ def readActiveAgentData(agent_count):
             own_active_agents[agent_id] = agents[agent_id]
         else:
             enemy_active_agents[agent_id] = agents[agent_id]
+
+        active_agents[agent_id] = agents[agent_id]
 #endregion
 
 #region game logic
@@ -74,6 +77,7 @@ while True:
 
     enemy_active_agents = {}
     own_active_agents = {}
+    active_agents = {}
     
     readActiveAgentData(agent_count)
 
@@ -85,7 +89,7 @@ while True:
 
     for agent in own_active_agents.values():
         if agent.getPlayerId() == my_id:
-            agent_command = calculateAgentCommand(agent, agents, turn_values)
+            agent_command = calculateAgentCommand(agent, active_agents, map, turn_values)
             print(agent_command)
 #endregion
 #endregion

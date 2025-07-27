@@ -31,8 +31,8 @@ class AgentCommand():
     def __shoot_string(self) -> str:
         return f"SHOOT {self.__shoot_target};" if self.__shoot_target else ""
 
-    def setThrowTarget(self, x: int, y: int) -> Self:
-        self.__throw_target = (x,y)
+    def setThrowTarget(self, target: tuple[int,int]) -> Self:
+        self.__throw_target = target
         return self
 
     def __throw_string(self) -> str:

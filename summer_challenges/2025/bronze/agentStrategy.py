@@ -1,4 +1,5 @@
 from agent import Agent
+from map import Map
 from agentState import AgentState
 from agentCommand import AgentCommand
 from debugPrint import debugPrint
@@ -10,32 +11,32 @@ shooting_rules = getRulesHandler(RuleType.SHOOTING)
 throwing_rules = getRulesHandler(RuleType.THROWING)
 hunker_down_rules = getRulesHandler(RuleType.HUNKER_DOWN)
 
-def calculateAgentCommand(agent: Agent, agents: dict[int,Agent], turn_values: TurnValues) -> AgentCommand:
+def calculateAgentCommand(agent: Agent, agents: dict[int,Agent], map: Map, turn_values: TurnValues) -> AgentCommand:
     agent_command = AgentCommand(agent.getAgentId())
-    ApplyMovingRules(agent_command, agent, agents, turn_values)
-    ApplyCombatRules(agent_command, agent, agents, turn_values)
+    ApplyMovingRules(agent_command, agent, agents, map, turn_values)
+    ApplyCombatRules(agent_command, agent, agents, map, turn_values)
 
     return agent_command
         
-def ApplyMovingRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], turn_values: TurnValues):
-    moving_rules.applyRules(agent_command, agent, agents, turn_values)
+def ApplyMovingRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], map: Map, turn_values: TurnValues):
+    moving_rules.applyRules(agent_command, agent, agents, map, turn_values)
     pass
 
-def ApplyCombatRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], turn_values: TurnValues):
-    hunker_down = ApplyHunkerDownRules(agent_command, agent, agents, turn_values)
+def ApplyCombatRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], map: Map, turn_values: TurnValues):
+    hunker_down = ApplyHunkerDownRules(agent_command, agent, agents, map, turn_values)
     if not hunker_down:
-        throw_bomb = ApplyThrowRules(agent_command, agent, agents, turn_values)
+        throw_bomb = ApplyThrowRules(agent_command, agent, agents, map, turn_values)
         if not throw_bomb:
-            ApplyShootingRules(agent_command, agent, agents, turn_values)
+            ApplyShootingRules(agent_command, agent, agents, map, turn_values)
 
-def ApplyHunkerDownRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], turn_values: TurnValues) -> bool:
-    return hunker_down_rules.applyRules(agent_command, agent, agents, turn_values)
+def ApplyHunkerDownRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], map: Map, turn_values: TurnValues) -> bool:
+    return hunker_down_rules.applyRules(agent_command, agent, agents, map, turn_values)
 
-def ApplyThrowRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], turn_values: TurnValues) -> bool:
-    return throwing_rules.applyRules(agent_command, agent, agents, turn_values)
+def ApplyThrowRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], map: Map, turn_values: TurnValues) -> bool:
+    return throwing_rules.applyRules(agent_command, agent, agents, map, turn_values)
 
-def ApplyShootingRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], turn_values: TurnValues) -> bool:
-    return shooting_rules.applyRules(agent_command, agent, agents, turn_values)
+def ApplyShootingRules(agent_command: AgentCommand, agent: Agent, agents: dict[int,Agent], map: Map, turn_values: TurnValues) -> bool:
+    return shooting_rules.applyRules(agent_command, agent, agents, map, turn_values)
 
 ## plan
 # for each agent
