@@ -31,13 +31,14 @@ def readActiveAgentData(agent_count):
         agents[agent_id].updateCooldown(cooldown)
         agents[agent_id].updateSplashBombs(splash_bombs)
         agents[agent_id].updateWetness(wetness)
-        if(agents[agent_id].player_id == my_id):
+        if(agents[agent_id].getPlayerId() == my_id):
             own_active_agents[agent_id] = agents[agent_id]
         else:
             enemy_active_agents[agent_id] = agents[agent_id]
 #endregion
 
 #region game logic
+agents : dict[int, Agent] = {}
 
 my_id = int(input())  # Your player id (0 or 1)
 agent_data_count = int(input())  # Total number of agents in the game
@@ -61,7 +62,7 @@ for i in range(height):
 
 map.printMap()
 
-areas = [(2, 2, False), (map.width-3, 2, False), (2, map.height-3, False), (map.width-3, map.height-3, False)]
+areas = [(2, 2, False), (map.getWidth()-3, 2, False), (2, map.getHeight()-3, False), (map.getWidth()-3, map.getHeight()-3, False)]
 
 agent_target = None
 target_area = None
@@ -79,7 +80,7 @@ while True:
 
     agent: Agent
     for agent in own_active_agents.values():
-        if agent.player_id == my_id:
+        if agent.getPlayerId() == my_id:
             agent_command = AgentCommand(agent.getAgentId()).setHunkerDown()
             print(agent_command)
 #endregion

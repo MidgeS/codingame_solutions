@@ -12,7 +12,7 @@ class AgentCommand():
         self.__agent_id = agent_id
 
     def __str__(self):
-        self.getOutputString()
+        return self.getOutputString()
 
     def __agent_string(self) -> str:
         return f"{self.__agent_id};"
