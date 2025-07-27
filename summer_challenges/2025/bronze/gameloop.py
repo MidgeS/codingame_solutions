@@ -1,8 +1,9 @@
 from agent import Agent
 from map import Map
 from debugPrint import debugPrint
-from agentCommand import AgentCommand
-from subfolder.test import Testclass
+from agentStrategy import calculateAgentCommand
+from turnValues import TurnValues
+
 
 #region helper functions
 def readAgentData(agent_data_count):
@@ -79,9 +80,12 @@ while True:
     my_agent_count = int(input())  # Number of alive agents controlled by you
 
     agent: Agent
+
+    turn_values = TurnValues().calculateTurnValues(agents, map)
+
     for agent in own_active_agents.values():
         if agent.getPlayerId() == my_id:
-            agent_command = AgentCommand(agent.getAgentId()).setHunkerDown()
+            agent_command = calculateAgentCommand(agent, agents, turn_values)
             print(agent_command)
 #endregion
 #endregion

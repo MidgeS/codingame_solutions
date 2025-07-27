@@ -17,8 +17,8 @@ class AgentCommand():
     def __agent_string(self) -> str:
         return f"{self.__agent_id};"
 
-    def setMoveTarget(self, x: int, y: int) -> Self:
-        self.__move_target = (x,y)
+    def setMoveTarget(self, target: tuple[int,int]) -> Self:
+        self.__move_target = target
         return self
 
     def __move_string(self) -> str:

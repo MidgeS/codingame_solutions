@@ -1,4 +1,5 @@
 from typing import Self
+from agentState import AgentState
 
 class Agent:
     __id = 0
@@ -12,6 +13,7 @@ class Agent:
     __x = -1
     __y = -1
     __active = False
+    __state: AgentState = AgentState.IDLE
 
     def __init__(self, agent_id, player, shoot_cooldown, optimal_range, soaking_power, splash_bombs, active):
         self.__id = agent_id
@@ -67,4 +69,11 @@ class Agent:
     
     def updateWetness(self, wetness) -> Self:
         self.__wetness = wetness
+        return self
+    
+    def getState(self) -> AgentState:
+        return self.__state
+    
+    def setState(self, state: AgentState) -> Self:
+        self.__state = state
         return self
